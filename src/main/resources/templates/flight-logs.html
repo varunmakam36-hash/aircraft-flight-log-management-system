@@ -1,0 +1,137 @@
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Logs | FlightLog</title>
+
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<main class="main-content">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Flight Logs</h2>
+            <p class="text-muted mb-0">Manage and track aircraft flights.</p>
+        </div>
+
+        <a th:href="@{/flight-logs/new}" class="btn btn-primary">
+            + Add Flight
+        </a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success"
+         th:text="${success}"></div>
+
+    <div th:if="${error}" class="alert alert-danger"
+         th:text="${error}"></div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form th:action="@{/flight-logs}" method="get">
+                <div class="input-group">
+                    <input type="text"
+                           name="keyword"
+                           class="form-control"
+                           placeholder="Search flight number, status, aircraft or pilot..."
+                           th:value="${keyword}">
+
+                    <button type="submit" class="btn btn-primary">
+                        Search
+                    </button>
+
+                    <a th:href="@{/flight-logs}"
+                       class="btn btn-outline-secondary">
+                        Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">Flight Records</h5>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Flight Number</th>
+                        <th>Aircraft Registration</th>
+                        <th>Pilot Name</th>
+                        <th>Departure</th>
+                        <th>Arrival</th>
+                        <th>Date</th>
+                        <th>Hours</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="flight : ${flightList}">
+                        <td class="fw-semibold"
+                            th:text="${flight.flightNumber}"></td>
+
+                        <td th:text="${aircraftMap != null
+                            and aircraftMap.get(flight.aircraftId) != null
+                            ? aircraftMap.get(flight.aircraftId).registrationNumber
+                            : 'Unknown'}"></td>
+
+                        <td th:text="${pilotMap != null
+                            and pilotMap.get(flight.pilotId) != null
+                            ? pilotMap.get(flight.pilotId).fullName
+                            : 'Unknown'}"></td>
+
+                        <td th:text="${flight.departureAirport}"></td>
+                        <td th:text="${flight.arrivalAirport}"></td>
+                        <td th:text="${flight.flightDate}"></td>
+                        <td th:text="${flight.flightHours}"></td>
+
+                        <td>
+                            <span class="badge bg-success"
+                                  th:text="${flight.status}"></span>
+                        </td>
+
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/flight-logs/edit/{id}(id=${flight.id})}"
+                                   class="btn btn-sm btn-warning">
+                                    Edit
+                                </a>
+
+                                <form th:action="@{/flight-logs/delete/{id}(id=${flight.id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Delete this flight record?');">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(flightList)}">
+                        <td colspan="9" class="text-center text-muted py-4">
+                            No matching flight records found.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>
+```

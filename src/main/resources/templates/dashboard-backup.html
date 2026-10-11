@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | FlightLog</title>
+
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+
+    <style>
+        .welcome-banner {
+            background: linear-gradient(115deg, #132747, #2456a5);
+            color: white;
+            padding: 27px 30px;
+            border-radius: 17px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner h2 {
+            font-size: 25px;
+            font-weight: 750;
+            margin-bottom: 8px;
+        }
+
+        .welcome-banner p {
+            margin: 0;
+            color: #d5e3fa;
+        }
+
+        .banner-tag {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 7px 12px;
+            background: rgba(255,255,255,.13);
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .stat-card {
+            position: relative;
+            height: 100%;
+            background: white;
+            border: 1px solid #e7ebf2;
+            border-radius: 15px;
+            padding: 21px;
+            box-shadow: 0 4px 18px rgba(20,39,75,.035);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(20,39,75,.08);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-icon {
+            width: 43px;
+            height: 43px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: #eaf1ff;
+            color: #2865d5;
+            font-size: 21px;
+        }
+
+        .stat-label {
+            margin-top: 17px;
+            color: #778399;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            margin-top: 5px;
+            color: #17243b;
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -.8px;
+        }
+
+        .stat-note {
+            margin-top: 5px;
+            color: #8b96a8;
+            font-size: 12px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border: 1px solid #e7ebf2;
+            border-radius: 15px;
+            margin-top: 25px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(20,39,75,.035);
+        }
+
+        .dashboard-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 23px;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        .dashboard-card-header h5 {
+            font-size: 15px;
+            font-weight: 750;
+            margin: 0;
+        }
+
+        .dashboard-card-header p {
+            margin: 5px 0 0;
+            color: #8994a6;
+            font-size: 12px;
+        }
+
+        .dashboard-card-body {
+            padding: 0;
+        }
+
+        .table thead th {
+            padding: 14px 20px;
+            background: #f8faff;
+            color: #78849a;
+            border-bottom: 1px solid #edf0f5;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+        }
+
+        .table tbody td {
+            padding: 15px 20px;
+            font-size: 13px;
+            color: #344054;
+            border-color: #f0f2f6;
+        }
+
+        .flight-number {
+            font-weight: 750;
+            color: #245bc0;
+        }
+
+        .route-text {
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .route-arrow {
+            color: #98a2b3;
+            padding: 0 5px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            padding: 30px !important;
+            text-align: center;
+            color: #8b96a8 !important;
+        }
+
+        .quick-link {
+            color: #2865d5;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .quick-link:hover {
+            color: #1746a2;
+        }
+
+        .page-footer {
+            margin-top: 28px;
+            color: #8b96a8;
+            font-size: 12px;
+        }
+
+        @media (max-width: 650px) {
+            .welcome-banner {
+                padding: 22px;
+            }
+
+            .welcome-banner h2 {
+                font-size: 21px;
+            }
+
+            .stat-value {
+                font-size: 26px;
+            }
+
+            .dashboard-card-header {
+                padding: 17px;
+            }
+
+            .table tbody td,
+            .table thead th {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<main class="main-content">
+
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">
+                Overview of your aircraft operations and flight activity.
+            </p>
+        </div>
+        <span class="badge text-bg-primary p-2">Administrator</span>
+    </header>
+
+    <section class="welcome-banner">
+        <h2>Welcome to FlightLog</h2>
+        <p>Manage your aircraft, pilots, flight records and maintenance in one place.</p>
+        <span class="banner-tag">✈ Aircraft Flight Log Management System</span>
+    </section>
+
+    <!-- Summary cards -->
+    <section class="row g-3">
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon">✈</div>
+                </div>
+                <div class="stat-label">TOTAL AIRCRAFT</div>
+                <div class="stat-value" th:text="${totalAircraft}">0</div>
+                <div class="stat-note">Registered aircraft</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon">♙</div>
+                </div>
+                <div class="stat-label">TOTAL PILOTS</div>
+                <div class="stat-value" th:text="${totalPilots}">0</div>
+                <div class="stat-note">Registered pilots</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon">◷</div>
+                </div>
+                <div class="stat-label">TOTAL FLIGHTS</div>
+                <div class="stat-value" th:text="${totalFlights}">0</div>
+                <div class="stat-note">Recorded flights</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon">⚙</div>
+                </div>
+                <div class="stat-label">MAINTENANCE</div>
+                <div class="stat-value" th:text="${totalMaintenance}">0</div>
+                <div class="stat-note">Maintenance records</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon">◴</div>
+                </div>
+                <div class="stat-label">FLIGHT HOURS</div>
+                <div class="stat-value"
+                     th:text="${#numbers.formatDecimal(totalFlightHours, 1, 1)}">0.0</div>
+                <div class="stat-note">Total logged hours</div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Recent flights -->
+    <section class="dashboard-card">
+        <div class="dashboard-card-header">
+            <div>
+                <h5>Recent Flight Activity</h5>
+                <p>Your latest recorded flight operations</p>
+            </div>
+            <a th:href="@{/flight-logs}" class="quick-link">View all flights →</a>
+        </div>
+
+        <div class="dashboard-card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th>Flight</th>
+                    <th>Aircraft</th>
+                    <th>Pilot</th>
+                    <th>Route</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="flight : ${recentFlights}">
+                    <td>
+                        <span class="flight-number"
+                              th:text="${flight.flightNumber}"></span>
+                    </td>
+
+                    <td>
+                        <span th:if="${aircraftMap.containsKey(flight.aircraftId)}"
+                              th:text="${aircraftMap.get(flight.aircraftId).registrationNumber}">
+                        </span>
+                        <span th:unless="${aircraftMap.containsKey(flight.aircraftId)}">
+                            Unknown
+                        </span>
+                    </td>
+
+                    <td>
+                        <span th:if="${pilotMap.containsKey(flight.pilotId)}"
+                              th:text="${pilotMap.get(flight.pilotId).fullName}">
+                        </span>
+                        <span th:unless="${pilotMap.containsKey(flight.pilotId)}">
+                            Unknown
+                        </span>
+                    </td>
+
+                    <td class="route-text">
+                        <span th:text="${flight.departureAirport}"></span>
+                        <span class="route-arrow">→</span>
+                        <span th:text="${flight.arrivalAirport}"></span>
+                    </td>
+
+                    <td>
+                        <span class="status" th:text="${flight.status}"></span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(recentFlights)}">
+                    <td colspan="5" class="empty-state">
+                        No flight records yet. Add your first flight to get started.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Aircraft status -->
+    <section class="dashboard-card">
+        <div class="dashboard-card-header">
+            <div>
+                <h5>Aircraft Status</h5>
+                <p>Current status of registered aircraft</p>
+            </div>
+            <a th:href="@{/aircraft}" class="quick-link">Manage aircraft →</a>
+        </div>
+
+        <div class="dashboard-card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th>Registration</th>
+                    <th>Manufacturer</th>
+                    <th>Model</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="aircraft : ${aircraftList}">
+                    <td class="fw-semibold"
+                        th:text="${aircraft.registrationNumber}"></td>
+                    <td th:text="${aircraft.manufacturer}"></td>
+                    <td th:text="${aircraft.model}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${aircraft.status == 'Available'} ? ' bg-success' : (${aircraft.status == 'Maintenance'} ? ' bg-warning text-dark' : ' bg-secondary')"
+                              th:text="${aircraft.status}">
+                        </span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(aircraftList)}">
+                    <td colspan="4" class="empty-state">
+                        No aircraft registered yet.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        FlightLog · Aircraft Flight Log Management System · College Project
+    </footer>
+
+</main>
+
+</body>
+</html>

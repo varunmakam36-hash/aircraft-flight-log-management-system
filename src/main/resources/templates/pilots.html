@@ -1,0 +1,114 @@
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilot Management | Aircraft Flight Log</title>
+
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<main class="main-content">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Pilot Management</h2>
+            <p class="text-muted mb-0">Manage pilot information and licenses.</p>
+        </div>
+
+        <a th:href="@{/pilots/new}" class="btn btn-primary">
+            + Add Pilot
+        </a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success"
+         th:text="${success}"></div>
+
+    <div th:if="${error}" class="alert alert-danger"
+         th:text="${error}"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <input type="text"
+                   id="searchInput"
+                   class="form-control mb-3"
+                   placeholder="Search by employee ID, name, license, email or phone...">
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle"
+                       id="pilotTable">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Full Name</th>
+                        <th>License Number</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="pilot : ${pilotList}">
+                        <td th:text="${pilot.employeeId}"></td>
+                        <td th:text="${pilot.fullName}"></td>
+                        <td th:text="${pilot.licenseNumber}"></td>
+                        <td th:text="${pilot.email}"></td>
+                        <td th:text="${pilot.phone}"></td>
+
+                        <td>
+                            <span class="badge bg-success"
+                                  th:text="${pilot.status}"></span>
+                        </td>
+
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/pilots/edit/{id}(id=${pilot.id})}"
+                                   class="btn btn-sm btn-warning">
+                                    Edit
+                                </a>
+
+                                <form th:action="@{/pilots/delete/{id}(id=${pilot.id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Delete this pilot?');">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(pilotList)}">
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No pilots registered yet. Click Add Pilot to begin.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById("searchInput").addEventListener("input", function () {
+        const searchText = this.value.toLowerCase();
+
+        document.querySelectorAll("#pilotTable tbody tr").forEach(function (row) {
+            if (!row.querySelector("td[colspan]")) {
+                row.style.display =
+                    row.innerText.toLowerCase().includes(searchText) ? "" : "none";
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+```

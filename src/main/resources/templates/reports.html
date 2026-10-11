@@ -1,0 +1,349 @@
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reports | FlightLog</title>
+
+    <!-- Shared application styles -->
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+
+    <!-- Chart.js for the pie chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            height: 100%;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.04);
+        }
+
+        .report-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .report-value {
+            color: #101d35;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 25px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.04);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 320px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 576px) {
+            .section-card {
+                padding: 15px;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+        }
+
+        @media print {
+            .sidebar,
+            .no-print {
+                display: none !important;
+            }
+
+            .main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .section-card,
+            .report-card {
+                box-shadow: none !important;
+                border: 1px solid #ddd;
+                break-inside: avoid;
+            }
+
+            .table {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Shared navigation sidebar -->
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<main class="main-content">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold">Reports</h2>
+            <p class="text-muted mb-0">
+                Flight operations and maintenance summary
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 no-print">
+            <button type="button"
+                    onclick="window.print()"
+                    class="btn btn-primary">
+                Print / Save PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row g-4">
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="report-card">
+                <div class="report-label">Total Aircraft</div>
+                <div class="report-value"
+                     th:text="${totalAircraft}">0</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="report-card">
+                <div class="report-label">Total Pilots</div>
+                <div class="report-value"
+                     th:text="${totalPilots}">0</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="report-card">
+                <div class="report-label">Total Flights</div>
+                <div class="report-value"
+                     th:text="${totalFlights}">0</div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="report-card">
+                <div class="report-label">Total Flight Hours</div>
+                <div class="report-value"
+                     th:text="${#numbers.formatDecimal(totalFlightHours, 1, 1)}">
+                    0.0
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Flight Status Pie Chart -->
+    <div class="section-card">
+        <h5 class="fw-bold mb-2">Flight Status Distribution</h5>
+
+        <p class="text-muted small mb-4">
+            Breakdown of recorded flights by their current status.
+        </p>
+
+        <div th:if="${#lists.isEmpty(flightList)}"
+             class="text-center text-muted py-4">
+            No flight records available to display in the chart.
+        </div>
+
+        <div class="chart-container"
+             th:if="${not #lists.isEmpty(flightList)}">
+            <canvas id="flightStatusChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Flight Report -->
+    <div class="section-card">
+        <h5 class="fw-bold mb-3">Flight Records Report</h5>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Aircraft ID</th>
+                    <th>Pilot ID</th>
+                    <th>Departure</th>
+                    <th>Arrival</th>
+                    <th>Date</th>
+                    <th>Hours</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="flight : ${flightList}">
+                    <td th:text="${flight.flightNumber}"></td>
+                    <td th:text="${flight.aircraftId}"></td>
+                    <td th:text="${flight.pilotId}"></td>
+                    <td th:text="${flight.departureAirport}"></td>
+                    <td th:text="${flight.arrivalAirport}"></td>
+                    <td th:text="${flight.flightDate}"></td>
+                    <td th:text="${flight.flightHours}"></td>
+                    <td>
+                        <span class="badge bg-success"
+                              th:text="${flight.status}"></span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(flightList)}">
+                    <td colspan="8"
+                        class="text-center text-muted py-3">
+                        No flight records available.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Maintenance Report -->
+    <div class="section-card">
+        <h5 class="fw-bold mb-3">Maintenance Records Report</h5>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th>Aircraft ID</th>
+                    <th>Maintenance Type</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Next Due</th>
+                    <th>Cost (₹)</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="record : ${maintenanceList}">
+                    <td th:text="${record.aircraftId}"></td>
+                    <td th:text="${record.maintenanceType}"></td>
+                    <td th:text="${record.description}"></td>
+                    <td th:text="${record.maintenanceDate}"></td>
+                    <td th:text="${record.nextDueDate}"></td>
+                    <td th:text="${record.cost != null ? record.cost : '-'}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${record.status == 'Completed'
+                                  ? 'bg-success'
+                                  : (record.status == 'In Progress'
+                                      ? 'bg-warning text-dark'
+                                      : 'bg-secondary')}"
+                              th:text="${record.status}">
+                        </span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(maintenanceList)}">
+                    <td colspan="7"
+                        class="text-center text-muted py-3">
+                        No maintenance records available.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="text-muted small mt-4">
+        Aircraft Flight Log Management System · College Project
+    </p>
+
+</main>
+
+<!-- Build the chart from the existing Thymeleaf flight list -->
+<script th:inline="javascript">
+    const flightStatuses = /*[[${flightStatusCounts}]]*/ null;
+
+    const chartLabels = flightStatuses
+        ? Object.keys(flightStatuses)
+        : [];
+
+    const chartValues = flightStatuses
+        ? Object.values(flightStatuses)
+        : [];
+
+    const chartCanvas = document.getElementById("flightStatusChart");
+
+    if (chartCanvas && chartLabels.length > 0) {
+        new Chart(chartCanvas, {
+            type: "pie",
+
+            data: {
+                labels: chartLabels,
+
+                datasets: [{
+                    data: chartValues,
+
+                    backgroundColor: [
+                        "#2563eb",
+                        "#16a34a",
+                        "#f59e0b",
+                        "#dc2626",
+                        "#9333ea",
+                        "#64748b",
+                        "#0891b2"
+                    ],
+
+                    borderColor: "#ffffff",
+                    borderWidth: 2
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const total = context.dataset.data
+                                    .reduce((sum, number) => sum + number, 0);
+
+                                const percentage = total > 0
+                                    ? ((value / total) * 100).toFixed(1)
+                                    : "0.0";
+
+                                return context.label + ": " +
+                                    value + " flights (" + percentage + "%)";
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
+```

@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Form | FlightLog</title>
+
+    <th:block th:replace="~{fragments :: styles}"></th:block>
+</head>
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<main class="main-content">
+    <div class="page-header">
+        <h1 th:text="${maintenance.id == null ? 'Add Maintenance Record' : 'Edit Maintenance Record'}">
+            Maintenance Record
+        </h1>
+        <p>Record aircraft maintenance activities and schedules.</p>
+    </div>
+
+    <div class="form-container">
+        <div class="form-panel">
+
+            <form th:action="@{/maintenance/save}"
+                  th:object="${maintenance}"
+                  method="post">
+
+                <input type="hidden" th:field="*{id}">
+
+                <div class="mb-3">
+                    <label class="form-label">Aircraft</label>
+                    <select th:field="*{aircraftId}"
+                            class="form-select"
+                            th:classappend="${#fields.hasErrors('aircraftId')} ? 'is-invalid' : ''">
+                        <option value="">Select Aircraft</option>
+                        <option th:each="aircraft : ${aircraftList}"
+                                th:value="${aircraft.id}"
+                                th:text="${aircraft.registrationNumber + ' - ' + aircraft.model}">
+                        </option>
+                    </select>
+                    <div class="invalid-feedback"
+                         th:errors="*{aircraftId}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Maintenance Type</label>
+                    <select th:field="*{maintenanceType}"
+                            class="form-select"
+                            th:classappend="${#fields.hasErrors('maintenanceType')} ? 'is-invalid' : ''">
+                        <option value="">Select Type</option>
+                        <option value="Routine Inspection">Routine Inspection</option>
+                        <option value="Engine Maintenance">Engine Maintenance</option>
+                        <option value="Repair">Repair</option>
+                        <option value="Component Replacement">Component Replacement</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div class="invalid-feedback"
+                         th:errors="*{maintenanceType}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea th:field="*{description}"
+                              class="form-control"
+                              th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"
+                              rows="3"
+                              placeholder="Enter maintenance details"></textarea>
+                    <div class="invalid-feedback"
+                         th:errors="*{description}"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Maintenance Date</label>
+                        <input type="date"
+                               th:field="*{maintenanceDate}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('maintenanceDate')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback"
+                             th:errors="*{maintenanceDate}"></div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Next Due Date</label>
+                        <input type="date"
+                               th:field="*{nextDueDate}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('nextDueDate')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback"
+                             th:errors="*{nextDueDate}"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Cost (₹)</label>
+                    <input type="number"
+                           th:field="*{cost}"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('cost')} ? 'is-invalid' : ''"
+                           min="0"
+                           step="0.01"
+                           placeholder="Enter maintenance cost">
+                    <div class="invalid-feedback"
+                         th:errors="*{cost}"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Status</label>
+                    <select th:field="*{status}"
+                            class="form-select"
+                            th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''">
+                        <option value="">Select Status</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <div class="invalid-feedback"
+                         th:errors="*{status}"></div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Save Record
+                    </button>
+                    <a th:href="@{/maintenance}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
